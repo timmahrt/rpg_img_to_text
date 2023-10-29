@@ -32,6 +32,9 @@ def renderImage(image):
 def renderHeader():
     st.header("Game screenshot OCR")
     st.write("Upload a screenshot from a game with Japanese text and extract the text!")
+    st.write(
+        "(Currently this probably won't work well for games other than Final Fantasy 4)"
+    )
 
 
 def renderDemo():
