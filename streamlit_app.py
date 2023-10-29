@@ -6,22 +6,23 @@ import streamlit as st
 import image_processing as ip
 
 
-def loadImageFromUser():
-    uploaded_file = st.file_uploader("Choose an image")
-    if uploaded_file is None:
-        return None
+def loadImagesFromUser():
+    uploaded_files = st.file_uploader("Upload image(s)", accept_multiple_files=True)
+    if len(uploaded_files) == 0:
+        exit(0)  # TODO: some sort of error handling?
 
-    # To read file as bytes:
-    bytes_data = uploaded_file.getvalue()
+    for uploaded_file in uploaded_files:
+        # To read file as bytes:
+        bytes_data = uploaded_file.getvalue()
 
-    # https://stackoverflow.com/a/32908899
-    try:
-        image = Image.open(io.BytesIO(bytes_data))
-    except UnidentifiedImageError:
-        st.write("Uploaded file was not detected as an image.")
-        return None
+        # https://stackoverflow.com/a/32908899
+        try:
+            image = Image.open(io.BytesIO(bytes_data))
+        except UnidentifiedImageError:
+            st.write("Uploaded file was not detected as an image.")
+            continue  # TODO: some sort of error handling?
 
-    return image
+        yield image
 
 
 def renderImage(image):
@@ -46,25 +47,41 @@ def renderDemo():
     st.write(ocredText)
 
 
+class OcredImage:
+    def __init__(self, image):
+        self.original = image
+
+        self.processed = ip.preprocess(image)
+        self.cropped = ip.cropImage(self.processed)
+        self.text = ip.ocr(self.cropped)
+
+    def renderDebugInfo(self):
+        renderImage(self.original)
+        renderImage(self.processed)
+        renderImage(self.cropped)
+
+
 def renderMainContent():
     debug = st.checkbox("Debug mode")
-    image = loadImageFromUser()
-    if not image:
-        exit(0)
+    debugImages = []
+    for i, image in enumerate(loadImagesFromUser()):
+        if not image:
+            exit(0)
 
-    preprocessedImage = ip.preprocess(image)
+        if i == 0:
+            st.subheader("Detected text")
 
-    croppedImage = ip.cropImage(preprocessedImage)
-    ocredText = ip.ocr(croppedImage)
+        ocredImage = OcredImage(image)
 
-    st.subheader("Detected text")
-    st.write(ocredText)
+        st.write(ocredImage.text)
 
-    if debug:
+        if debug:
+            debugImages.append(ocredImage)
+
+    if len(debugImages) != 0:
         st.subheader("Debug info")
-        renderImage(image)
-        renderImage(preprocessedImage)
-        renderImage(croppedImage)
+        for image in debugImages:
+            image.renderDebugInfo()
 
 
 renderHeader()
