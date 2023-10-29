@@ -28,23 +28,48 @@ def renderImage(image):
     st.image(image)
 
 
-st.header("Game screenshot OCR")
-st.write("Upload a screenshot from a game with Japanese text and extract the text!")
-image = loadImageFromUser()
-if not image:
-    exit(0)
-debug = st.checkbox("Debug mode")
+def renderHeader():
+    st.header("Game screenshot OCR")
+    st.write("Upload a screenshot from a game with Japanese text and extract the text!")
 
-preprocessedImage = ip.preprocess(image)
 
-croppedImage = ip.cropImage(preprocessedImage)
-ocredText = ip.ocr(croppedImage)
+def renderDemo():
+    image = Image.open("files/ff4_sample.jpg")
+    preprocessedImage = ip.preprocess(image)
+    croppedImage = ip.cropImage(preprocessedImage)
+    ocredText = ip.ocr(croppedImage)
 
-st.subheader("Detected text")
-st.write(ocredText)
-
-if debug:
-    st.subheader("Debug info")
+    st.subheader("Target image")
     renderImage(image)
-    renderImage(preprocessedImage)
-    renderImage(croppedImage)
+
+    st.subheader("Detected text")
+    st.write(ocredText)
+
+
+def renderMainContent():
+    debug = st.checkbox("Debug mode")
+    image = loadImageFromUser()
+    if not image:
+        exit(0)
+
+    preprocessedImage = ip.preprocess(image)
+
+    croppedImage = ip.cropImage(preprocessedImage)
+    ocredText = ip.ocr(croppedImage)
+
+    st.subheader("Detected text")
+    st.write(ocredText)
+
+    if debug:
+        st.subheader("Debug info")
+        renderImage(image)
+        renderImage(preprocessedImage)
+        renderImage(croppedImage)
+
+
+renderHeader()
+demo = st.checkbox(label="Demo mode")
+if demo:
+    renderDemo()
+    exit(0)
+renderMainContent()
