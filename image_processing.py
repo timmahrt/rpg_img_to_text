@@ -1,8 +1,9 @@
 from PIL import Image, ImageFilter, ImageEnhance
 import pytesseract
 import cv2
-import numpy as np
-import os
+
+# import numpy as np
+# import os
 
 
 def preprocess(img):
