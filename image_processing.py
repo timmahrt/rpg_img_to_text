@@ -39,13 +39,13 @@ def textboxDetection(image):
     threshold1 = 75
     threshold2 = threshold1 * 3
 
-    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray_image, threshold1, threshold2)
+    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(grayImage, threshold1, threshold2)
     contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    largest_contour = max(contours, key=cv2.contourArea)
+    largestContour = max(contours, key=cv2.contourArea)
 
-    x, y, w, h = cv2.boundingRect(largest_contour)
+    x, y, w, h = cv2.boundingRect(largestContour)
     return cv2.rectangle(
         image, (x, y), (x + w, y + h), (0, 255, 0), 2
     )  # Green rectangle around the largest contour

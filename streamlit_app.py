@@ -6,18 +6,14 @@ import streamlit as st
 import image_processing as ip
 
 
-def loadImagesFromUser():
-    uploaded_files = st.file_uploader("Upload image(s)", accept_multiple_files=True)
-    if len(uploaded_files) == 0:
-        exit(0)  # TODO: some sort of error handling?
-
-    for uploaded_file in uploaded_files:
+def loadImagesFromUser(uploadedFiles):
+    for uploaded_file in uploadedFiles:
         # To read file as bytes:
-        bytes_data = uploaded_file.getvalue()
+        bytesData = uploaded_file.getvalue()
 
         # https://stackoverflow.com/a/32908899
         try:
-            image = Image.open(io.BytesIO(bytes_data))
+            image = Image.open(io.BytesIO(bytesData))
         except UnidentifiedImageError:
             st.write("Uploaded file was not detected as an image.")
             continue  # TODO: some sort of error handling?
@@ -35,6 +31,10 @@ def renderHeader():
     st.write(
         "(Currently this probably won't work well for games other than Final Fantasy 4)"
     )
+
+
+def renderFooter():
+    st.caption("[Github source](https://github.com/timmahrt/rpg_img_to_text)")
 
 
 def renderDemo():
@@ -67,9 +67,13 @@ class OcredImage:
 def renderMainContent():
     debug = st.checkbox("Debug mode")
     debugImages = []
-    for i, image in enumerate(loadImagesFromUser()):
+    uploadedFiles = st.file_uploader("Upload image(s)", accept_multiple_files=True)
+    if len(uploadedFiles) == 0:
+        return
+
+    for i, image in enumerate(loadImagesFromUser(uploadedFiles)):
         if not image:
-            exit(0)
+            return
 
         if i == 0:
             st.subheader("Detected text")
@@ -91,5 +95,6 @@ renderHeader()
 demo = st.checkbox(label="Demo mode")
 if demo:
     renderDemo()
-    exit(0)
-renderMainContent()
+else:
+    renderMainContent()
+renderFooter()
